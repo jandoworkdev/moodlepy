@@ -4,6 +4,7 @@ from views.login_view import LoginView
 from views.dashboard_view import DashboardView
 from views.categories_view import CategoriesView
 from views.courses_view import CoursesView
+from views.excel_view import ExcelView
 from sidebar import Sidebar
 
 
@@ -42,6 +43,8 @@ class App(ttk.Window):
             self.current_view = CategoriesView(self.container, self.api_client)
         elif view_name == "courses":
             self.current_view = CoursesView(self.container, self.api_client)
+        elif view_name == "excel":
+            self.current_view = ExcelView(self.container)
         else:
             self.current_view = ttk.Label(self.container, text="Vista no encontrada")
 

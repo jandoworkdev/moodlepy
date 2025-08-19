@@ -1,5 +1,5 @@
 import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
+from ttkbootstrap.constants import PRIMARY  # Replace PRIMARY with the actual constants you use, or remove if unused
 
 
 class CategoriesView(ttk.Frame):

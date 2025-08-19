@@ -1,5 +1,5 @@
 import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
+from ttkbootstrap.constants import PRIMARY
 
 
 class DashboardView(ttk.Frame):
