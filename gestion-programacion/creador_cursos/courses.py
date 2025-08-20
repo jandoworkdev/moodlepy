@@ -1,10 +1,20 @@
 import requests
 import pandas as pd
+import os
 
 # ========= CONFIG =========
 MOODLE_URL = "https://institutoloayzapresencial.edu.pe/TESTUAL/webservice/rest/server.php"
 TOKEN = "218d0d11240cf17a7d78abb90e6b6caa"
 EXCEL_FILE = "carga_ccursos.xlsx"
+
+# ========= MODELO CABECERAS =========
+MODELO_CABECERAS = [
+    "CICLO_MDL_ID",
+    "CURSO1",
+    "SHORTNAME1",
+    "CURSO2",
+    "SHORTNAME2"
+]
 
 # ========= FUNCIONES =========
 def call_moodle_ws(function, params):
@@ -57,7 +67,27 @@ def validar_duplicados(df):
     return True
 
 # ========= MAIN =========
+
+def crear_archivo_modelo(nombre_archivo):
+    """Crea un archivo Excel modelo con las cabeceras necesarias."""
+    df_modelo = pd.DataFrame(columns=MODELO_CABECERAS)
+    df_modelo.to_excel(nombre_archivo, index=False)
+    print(f"✅ Archivo modelo '{nombre_archivo}' creado con las cabeceras necesarias.")
+
 def main():
+    # Preguntar si desea generar el archivo modelo
+    respuesta = input("¿Desea generar un archivo modelo con las cabeceras necesarias antes de ejecutar? (S/N): ").strip().upper()
+    if respuesta == "S":
+        if os.path.exists(EXCEL_FILE):
+            sobrescribir = input(f"El archivo '{EXCEL_FILE}' ya existe. ¿Desea sobrescribirlo? (S/N): ").strip().upper()
+            if sobrescribir != "S":
+                print("Operación cancelada. No se generó el archivo modelo.")
+                return
+        crear_archivo_modelo(EXCEL_FILE)
+        print("Por favor, complete el archivo modelo y vuelva a ejecutar el programa.")
+        return
+
+    # Continuar con el proceso normal
     df = pd.read_excel(EXCEL_FILE)
 
     # 1. Validar duplicados
@@ -105,7 +135,7 @@ def main():
 
     # Guardar resultados en una nueva hoja del Excel
     df_resultados = pd.DataFrame(resultados)
-    with pd.ExcelWriter(EXCEL_FILE, mode="a", if_sheet_exists="replace") as writer:
+    with pd.ExcelWriter(EXCEL_FILE, mode="a", if_sheet_exists="replace", engine="openpyxl") as writer:
         df.to_excel(writer, sheet_name="ORIGINAL", index=False)
         df_resultados.to_excel(writer, sheet_name="CURSOS_IDS", index=False)
 

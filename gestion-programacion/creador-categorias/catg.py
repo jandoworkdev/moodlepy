@@ -1,12 +1,23 @@
 import requests
 import pandas as pd
+import os
 
 # ========= CONFIG =========
 MOODLE_URL = "https://institutoloayzapresencial.edu.pe/TESTUAL/webservice/rest/server.php"
 TOKEN = "218d0d11240cf17a7d78abb90e6b6caa"
-ROOT_CATEGORY_ID = 1152
+ROOT_CATEGORY_ID = 1325
 # SE DEBE ASIGNAR EL ID DE LA CATEGORÍA RAÍZ
 EXCEL_FILE = "carga_ccatg.xlsx"
+
+# ========= MODELO CABECERAS =========
+MODELO_CABECERAS = [
+    "ESPECIALIDAD",
+    "ESPC_ID",
+    "SEDE",
+    "SEDE_ID",
+    "CICLO",
+    "CICLO_ID"
+]
 
 # ========= FUNCIONES =========
 def call_moodle_ws(function, params):
@@ -43,10 +54,32 @@ def get_or_create_category(name, parent_id, idnumber=None):
         data["categories[0][idnumber]"] = idnumber
 
     response = call_moodle_ws("core_course_create_categories", data)
-    return response[0]["id"]
+    if isinstance(response, list) and len(response) > 0 and "id" in response[0]:
+        return response[0]["id"]
+    else:
+        print(f"❌ Error al crear la categoría '{name}': {response}")
+        raise Exception(f"No se pudo crear la categoría '{name}'. Respuesta: {response}")
 
 # ========= MAIN =========
+
+def crear_archivo_modelo(nombre_archivo):
+    """Crea un archivo Excel modelo con las cabeceras necesarias."""
+    df_modelo = pd.DataFrame(columns=MODELO_CABECERAS)
+    df_modelo.to_excel(nombre_archivo, index=False)
+    print(f"✅ Archivo modelo '{nombre_archivo}' creado con las cabeceras necesarias.")
+
 def main():
+    # Preguntar si desea generar el archivo modelo
+    respuesta = input("¿Desea generar un archivo modelo con las cabeceras necesarias antes de ejecutar? (S/N): ").strip().upper()
+    if respuesta == "S":
+        if os.path.exists(EXCEL_FILE):
+            sobrescribir = input(f"El archivo '{EXCEL_FILE}' ya existe. ¿Desea sobrescribirlo? (S/N): ").strip().upper()
+            if sobrescribir != "S":
+                print("Operación cancelada. No se generó el archivo modelo.")
+                return
+        crear_archivo_modelo(EXCEL_FILE)
+        print("Por favor, complete el archivo modelo y vuelva a ejecutar el programa.")
+        return
 
     df = pd.read_excel(EXCEL_FILE)
     # Lista para guardar los resultados
@@ -57,8 +90,8 @@ def main():
         esp_id = row["ESPC_ID"]
         sede = row["SEDE"]
         sede_id = row["SEDE_ID"]
-        ciclo = row["CICLO1"]
-        ciclo_id = row["CICLO1_ID"]
+        ciclo = row["CICLO"]
+        ciclo_id = row["CICLO_ID"]
 
         # Nivel 1: Especialidad
         cat_especialidad_id = get_or_create_category(especialidad, ROOT_CATEGORY_ID, esp_id)
@@ -77,8 +110,8 @@ def main():
             "SEDE": sede,
             "SEDE_ID": sede_id,
             "ID_CATEGORIA_SEDE": cat_sede_id,
-            "CICLO1": ciclo,
-            "CICLO1_ID": ciclo_id,
+            "CICLO": ciclo,
+            "CICLO_ID": ciclo_id,
             "ID_CATEGORIA_CICLO": cat_ciclo_id
         })
 
@@ -86,7 +119,7 @@ def main():
     df_resultados = pd.DataFrame(resultados)
 
     # Escribir los resultados en una nueva hoja del Excel
-    with pd.ExcelWriter(EXCEL_FILE, mode="a", if_sheet_exists="replace") as writer:
+    with pd.ExcelWriter(EXCEL_FILE, mode="a", if_sheet_exists="replace", engine="openpyxl") as writer:
         df.to_excel(writer, sheet_name="ORIGINAL", index=False)
         df_resultados.to_excel(writer, sheet_name="CATEGORIAS_IDS", index=False)
 
