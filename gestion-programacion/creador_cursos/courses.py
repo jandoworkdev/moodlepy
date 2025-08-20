@@ -2,9 +2,14 @@ import requests
 import pandas as pd
 import os
 
+# # ========= CONFIG =========
+# MOODLE_URL = "https://institutoloayzapresencial.edu.pe/TESTUAL/webservice/rest/server.php"
+# TOKEN = "218d0d11240cf17a7d78abb90e6b6caa"
+# EXCEL_FILE = "carga_ccursos.xlsx"
+
 # ========= CONFIG =========
-MOODLE_URL = "https://institutoloayzapresencial.edu.pe/TESTUAL/webservice/rest/server.php"
-TOKEN = "218d0d11240cf17a7d78abb90e6b6caa"
+MOODLE_URL = "https://apac.net.pe/webservice/rest/server.php"
+TOKEN = "6c0f01dc28a9a5e6f746760c3e0e6655"
 EXCEL_FILE = "carga_ccursos.xlsx"
 
 # ========= MODELO CABECERAS =========

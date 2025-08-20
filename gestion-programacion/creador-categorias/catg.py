@@ -2,10 +2,17 @@ import requests
 import pandas as pd
 import os
 
+# # ========= CONFIG =========
+# MOODLE_URL = "https://institutoloayzapresencial.edu.pe/TESTUAL/webservice/rest/server.php"
+# TOKEN = "218d0d11240cf17a7d78abb90e6b6caa"
+# ROOT_CATEGORY_ID = 1325
+# # SE DEBE ASIGNAR EL ID DE LA CATEGORÍA RAÍZ
+# EXCEL_FILE = "carga_ccatg.xlsx"
+
 # ========= CONFIG =========
-MOODLE_URL = "https://institutoloayzapresencial.edu.pe/TESTUAL/webservice/rest/server.php"
-TOKEN = "218d0d11240cf17a7d78abb90e6b6caa"
-ROOT_CATEGORY_ID = 1325
+MOODLE_URL = "https://apac.net.pe/webservice/rest/server.php"
+TOKEN = "6c0f01dc28a9a5e6f746760c3e0e6655"
+ROOT_CATEGORY_ID = 306
 # SE DEBE ASIGNAR EL ID DE LA CATEGORÍA RAÍZ
 EXCEL_FILE = "carga_ccatg.xlsx"
 
@@ -40,7 +47,12 @@ def get_categories(parent_id):
 
 def get_or_create_category(name, parent_id, idnumber=None):
     """Verifica si existe, sino crea la categoría"""
+
     categories = get_categories(parent_id)
+    # Validar que la respuesta sea una lista de dicts
+    if not isinstance(categories, list) or (len(categories) > 0 and not isinstance(categories[0], dict)):
+        print(f"❌ Error al obtener categorías para parent_id={parent_id}. Respuesta inesperada: {categories}")
+        raise Exception(f"Respuesta inesperada de get_categories: {categories}")
     for cat in categories:
         if cat["name"] == name:
             return cat["id"]
